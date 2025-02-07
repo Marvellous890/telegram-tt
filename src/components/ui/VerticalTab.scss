@@ -6,12 +6,14 @@
   width: 100%;
   height: 4rem;
   position: relative;
-  //background-color: #00A3B4;
-  //border-bottom: 1px solid #1a82ea;
 
   .title {
     font-size: 0.75rem;
     color: #717579;
+
+    &--active {
+      color: #5B99EE;
+    }
   }
 
   .badge {

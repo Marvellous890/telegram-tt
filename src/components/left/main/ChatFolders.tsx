@@ -348,6 +348,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
             title={folder.title.text}
             badgeCount={folderCountersById[folder.id]?.chatsCount}
             isBadgeActive={Boolean(folderCountersById[folder.id]?.notificationsCount)}
+            isActive={i === activeChatFolder}
             onClick={handleSwitchTab}
             clickArg={i}
             contextRootElementSelector="#LeftColumn"

@@ -39,6 +39,7 @@ const VerticalTab: FC<OwnProps> = ({
   title,
   badgeCount,
   isBadgeActive,
+  isActive,
   onClick,
   clickArg,
   contextActions,
@@ -82,8 +83,8 @@ const VerticalTab: FC<OwnProps> = ({
       onContextMenu={handleContextMenu}
       ref={tabRef}
     >
-      <FolderIcon />
-      <span className="title">{typeof title === 'string' ? renderText(title) : title}</span>
+      <FolderIcon isActive={isActive} />
+      <span className={buildClassName('title', isActive && 'title--active')}>{typeof title === 'string' ? renderText(title) : title}</span>
       {Boolean(badgeCount) && (
         <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>
       )}
