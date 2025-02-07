@@ -1,7 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
-  useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -326,16 +325,6 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   const shouldRenderFolders = folderTabs && folderTabs.length > 1;
 
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const isVerticalTabsEnabled = windowWidth >= 1276;
-
   return (
     <div
       className="With-Vertical-tabs-Wrapper"
@@ -377,8 +366,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         ) : undefined}
         <Transition
           ref={transitionRef}
-          name={shouldSkipHistoryAnimations
-          || isVerticalTabsEnabled ? 'none' : lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+          name={shouldSkipHistoryAnimations ? 'none' : lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
           activeKey={activeChatFolder}
           renderCount={shouldRenderFolders ? folderTabs.length : undefined}
         >
