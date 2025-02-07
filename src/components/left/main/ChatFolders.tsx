@@ -351,7 +351,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
             onClick={handleSwitchTab}
             clickArg={i}
             contextRootElementSelector="#LeftColumn"
-            // contextActions={contextActions?.length ? contextActions : undefined}
+            contextActions={folderTabs![i].contextActions}
           />
         ))}
       </div>
