@@ -1,0 +1,12 @@
+.FolderIcon {
+  //display: inline-block;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+
+  --color-fill: #717579;
+
+  &:hover {
+    --color-fill: #5B99EE;
+  }
+}

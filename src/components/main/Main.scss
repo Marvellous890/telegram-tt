@@ -44,9 +44,27 @@
     --left-column-max-width: 40vw;
   }
 
+  .Vertical-tabs-Container {
+    display: none;
+  }
+
   @media (min-width: 1276px) {
-    width: 25vw;
+    width: 30vw;
     --left-column-max-width: 33vw;
+
+    .With-Vertical-tabs-Wrapper {
+      display: flex;
+      height: 100%;
+    }
+
+    .Vertical-tabs-Container {
+      display: flex;
+      flex-direction: column;
+      width: 5rem;
+      height: 100%;
+      overflow: hidden;
+      background-color: #1c2533;
+    }
   }
 
   @media (max-width: 925px) {

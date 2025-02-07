@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -31,6 +32,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import StoryRibbon from '../../story/StoryRibbon';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
+import VerticalTab from '../../ui/VerticalTab';
 import ChatList from './ChatList';
 
 type OwnProps = {
@@ -324,34 +326,64 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   const shouldRenderFolders = folderTabs && folderTabs.length > 1;
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isVerticalTabsEnabled = windowWidth >= 1276;
+
   return (
     <div
-      ref={ref}
-      className={buildClassName(
-        'ChatFolders',
-        shouldRenderFolders && shouldHideFolderTabs && 'ChatFolders--tabs-hidden',
-        shouldRenderStoryRibbon && 'with-story-ribbon',
-      )}
+      className="With-Vertical-tabs-Wrapper"
     >
-      {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
-      {shouldRenderFolders ? (
-        <TabList
-          contextRootElementSelector="#LeftColumn"
-          tabs={folderTabs}
-          activeTab={activeChatFolder}
-          onSwitchTab={handleSwitchTab}
-        />
-      ) : shouldRenderPlaceholder ? (
-        <div ref={placeholderRef} className="tabs-placeholder" />
-      ) : undefined}
-      <Transition
-        ref={transitionRef}
-        name={shouldSkipHistoryAnimations ? 'none' : lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
-        activeKey={activeChatFolder}
-        renderCount={shouldRenderFolders ? folderTabs.length : undefined}
+      <div
+        className="Vertical-tabs-Container"
       >
-        {renderCurrentTab}
-      </Transition>
+        {displayedFolders && displayedFolders.length && displayedFolders.map((folder, i) => (
+          <VerticalTab
+            title={folder.title.text}
+            badgeCount={folderCountersById[folder.id]?.chatsCount}
+            isBadgeActive={Boolean(folderCountersById[folder.id]?.notificationsCount)}
+            onClick={handleSwitchTab}
+            clickArg={i}
+            contextRootElementSelector="#LeftColumn"
+            // contextActions={contextActions?.length ? contextActions : undefined}
+          />
+        ))}
+      </div>
+      <div
+        ref={ref}
+        className={buildClassName(
+          'ChatFolders',
+          shouldRenderFolders && shouldHideFolderTabs && 'ChatFolders--tabs-hidden',
+          shouldRenderStoryRibbon && 'with-story-ribbon',
+        )}
+      >
+        {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
+        {shouldRenderFolders ? (
+          <TabList
+            contextRootElementSelector="#LeftColumn"
+            tabs={folderTabs}
+            activeTab={activeChatFolder}
+            onSwitchTab={handleSwitchTab}
+          />
+        ) : shouldRenderPlaceholder ? (
+          <div ref={placeholderRef} className="tabs-placeholder" />
+        ) : undefined}
+        <Transition
+          ref={transitionRef}
+          name={shouldSkipHistoryAnimations
+          || isVerticalTabsEnabled ? 'none' : lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+          activeKey={activeChatFolder}
+          renderCount={shouldRenderFolders ? folderTabs.length : undefined}
+        >
+          {renderCurrentTab}
+        </Transition>
+      </div>
     </div>
   );
 };

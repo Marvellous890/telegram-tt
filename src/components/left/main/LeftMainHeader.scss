@@ -3,6 +3,18 @@
 #LeftMainHeader {
   position: relative;
 
+  @media (min-width: 1276px) {
+    .VT-Wrapper {
+      position: absolute;
+      z-index: 999;
+      top: 0;
+      left: 0;
+      background-color: #1c2533;
+      width: 5rem;
+      height: 100%;
+    }
+  }
+
   .DropdownMenuFiller {
     width: 2.5rem;
     height: 2.5rem;

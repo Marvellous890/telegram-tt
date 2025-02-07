@@ -29,6 +29,10 @@
     @media (max-width: 600px) {
       max-width: calc(100% - 3rem);
     }
+
+    @media (min-width: 1276px) {
+      margin-left: 3rem;
+    }
   }
 
   @media (max-width: 600px) {

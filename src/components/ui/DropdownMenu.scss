@@ -1,3 +1,8 @@
 .DropdownMenu {
   position: relative;
+
+  @media (min-width: 1276px) {
+    z-index: 9999;
+    margin-left: .25rem;
+  }
 }

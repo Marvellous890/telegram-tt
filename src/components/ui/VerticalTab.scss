@@ -1,0 +1,31 @@
+.vertical-tab {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 4rem;
+  position: relative;
+  //background-color: #00A3B4;
+  //border-bottom: 1px solid #1a82ea;
+
+  .title {
+    font-size: 0.75rem;
+    color: #717579;
+  }
+
+  .badge {
+    position: absolute;
+    top: 0;
+    right: 20%;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.75rem;
+    background-color: #5B99EE;
+    color: white;
+    text-align: center;
+    padding: 0 0.3125rem;
+    font-size: 0.75rem;
+    line-height: 1.3125rem;
+  }
+}
