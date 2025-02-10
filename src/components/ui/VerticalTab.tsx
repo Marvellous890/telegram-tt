@@ -17,6 +17,7 @@ import Menu from "./Menu";
 import MenuSeparator from "./MenuSeparator";
 import MenuItem from "./MenuItem";
 import {MouseButton} from "../../util/windowEnvironment";
+import {emoticons} from "../left/settings/folders/SettingsFoldersEdit";
 
 type OwnProps = {
   className?: string;
@@ -28,6 +29,7 @@ type OwnProps = {
   clickArg?: number;
   contextActions?: MenuItemContextAction[];
   contextRootElementSelector?: string;
+  emoticon?: string;
 };
 
 const classNames = {
@@ -44,6 +46,7 @@ const VerticalTab: FC<OwnProps> = ({
   clickArg,
   contextActions,
   contextRootElementSelector,
+  emoticon,
 }) => {
   if (title === 'All') title += ' chats';
 
@@ -75,6 +78,14 @@ const VerticalTab: FC<OwnProps> = ({
   );
   const getLayout = useLastCallback(() => ({ withPortal: true }));
 
+  function renderEmoticon(isActive: boolean) {
+    if (!emoticon || !emoticons.find((e)=> e.name === emoticon)) return <FolderIcon/>
+
+    let Icon = emoticons.find((e)=> e.name === emoticon)?.icon!;
+
+    return <Icon isActive={isActive} />
+  }
+
   return (
     <div
       className="vertical-tab"
@@ -83,7 +94,8 @@ const VerticalTab: FC<OwnProps> = ({
       onContextMenu={handleContextMenu}
       ref={tabRef}
     >
-      <FolderIcon isActive={isActive} />
+      {!emoticon && <FolderIcon isActive={isActive} /> }
+      {emoticon && renderEmoticon(isActive!)}
       <span className={buildClassName('title', isActive && 'title--active')}>{typeof title === 'string' ? renderText(title) : title}</span>
       {Boolean(badgeCount) && (
         <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>

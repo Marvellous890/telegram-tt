@@ -1,7 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React from '../../lib/teact/teact';
 
-import './FolderIcon.scss';
 import buildClassName from "../../util/buildClassName";
 
 type OwnProps = {
@@ -10,7 +9,7 @@ type OwnProps = {
 
 const FolderIcon: FC<OwnProps> = ({ isActive }) => {
   return (
-    <svg className={buildClassName("FolderIcon", isActive && "FolderIcon--active")} width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <svg className={buildClassName("emoticon", isActive && "emoticon--active")} width="36" height="36" viewBox="0 0 36 36" fill="none">
       <path
         d="M6.21265 9.53789C6 10.1456 6 10.9016 6 12.4135C6 12.6655 6 12.7915 6.03544 12.8928C6.09892 13.0742 6.24156 13.2169 6.42298 13.2803C6.52427 13.3158 6.65026 13.3158 6.90226 13.3158H29.2421C29.3595 13.3158 29.4181 13.3158 29.4672 13.308C29.7375 13.2652 29.9494 13.0533 29.9922 12.783C30 12.7339 30 12.6752 30 12.5579C30 12.0885 30 11.8538 29.9689 11.6574C29.7977 10.5764 28.9499 9.72863 27.8689 9.55742C27.6725 9.52632 27.4378 9.52632 26.9684 9.52632H19.1548C18.9418 9.52632 18.8353 9.52632 18.7327 9.52075C17.8706 9.47396 17.0503 9.13419 16.4077 8.55768C16.3312 8.48907 16.2559 8.41377 16.1053 8.26319C15.9547 8.1126 15.8794 8.03725 15.8029 7.96863C15.1602 7.39213 14.3399 7.05236 13.4778 7.00557C13.3752 7 13.2687 7 13.0557 7H11.4135C9.90159 7 9.14562 7 8.53789 7.21265C7.44937 7.59354 6.59354 8.44937 6.21265 9.53789Z"
         style="fill: var(--color-fill)"

@@ -216,3 +216,15 @@
     }
   }
 }
+
+.emoticon {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+
+  --color-fill: #717579;
+
+  &--active {
+    --color-fill: #5B99EE;
+  }
+}

@@ -1,4 +1,4 @@
-import type { FC } from '../../../../lib/teact/teact';
+import {FC, useRef} from '../../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
@@ -31,6 +31,14 @@ import FloatingActionButton from '../../../ui/FloatingActionButton';
 import InputText from '../../../ui/InputText';
 import ListItem from '../../../ui/ListItem';
 import Spinner from '../../../ui/Spinner';
+import FolderIcon from "../../../common/FolderIcon";
+import ChatsIcon from "../../../common/ChatsIcon";
+import ChatIcon from "../../../common/ChatIcon";
+import UserIcon from "../../../common/UserIcon";
+import GroupIcon from "../../../common/GroupIcon";
+import StarIcon from "../../../common/StarIcon";
+import ChannelIcon from "../../../common/ChannelIcon";
+import BotIcon from "../../../common/Bot";
 
 type OwnProps = {
   state: FoldersState;
@@ -63,6 +71,46 @@ const INITIAL_CHATS_LIMIT = 5;
 export const ERROR_NO_TITLE = 'Please provide a title for this folder.';
 export const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
 
+type Emoticon = {
+  name: string,
+  icon: FC
+}
+
+export const emoticons: Emoticon[] = [
+  {
+    name: "💬",
+    icon: ChatsIcon
+  },
+  {
+    name: "✅",
+    icon: ChatIcon
+  },
+  {
+    name: "👤",
+    icon: UserIcon
+  },
+  {
+    name: "👥",
+    icon: GroupIcon
+  },
+  {
+    name: "⭐",
+    icon: StarIcon
+  },
+  {
+    name: "📢",
+    icon: ChannelIcon
+  },
+  {
+    name: "🤖",
+    icon: BotIcon
+  },
+  {
+    name: "📁",
+    icon: FolderIcon
+  },
+]
+
 const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   state,
   dispatch,
@@ -94,6 +142,8 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
   const [isIncludedChatsListExpanded, setIsIncludedChatsListExpanded] = useState(false);
   const [isExcludedChatsListExpanded, setIsExcludedChatsListExpanded] = useState(false);
+
+  const [folderEmoticon, setFolderEmoticon] = useState<string | undefined>(state.folder.emoticon);
 
   useEffect(() => {
     if (isRemoved) {
@@ -154,6 +204,18 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { currentTarget } = event;
     dispatch({ type: 'setTitle', payload: currentTarget.value.trim() });
+  }, [dispatch]);
+
+  const handleSetEmoticon = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    const { currentTarget } = event;
+
+    let emoticon = currentTarget.getAttribute('data-emoticon');
+
+    if (folderEmoticon === emoticon) return;
+
+    setFolderEmoticon(emoticon!);
+
+    dispatch({ type: 'setEmoticon', payload:  emoticon});
   }, [dispatch]);
 
   const handleSubmit = useCallback(() => {
@@ -279,6 +341,14 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderEmoticon() {
+    if (!folderEmoticon || !emoticons.find((e)=> e.name === folderEmoticon)) return <FolderIcon/>
+
+    let Icon = emoticons.find((e)=> e.name === folderEmoticon)?.icon!;
+
+    return <Icon />
+  }
+
   return (
     <div className="settings-fab-wrapper">
       <div className="settings-content no-border custom-scroll">
@@ -296,13 +366,33 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             </p>
           )}
 
-          <InputText
-            className="mb-0"
-            label={lang('FilterNameHint')}
-            value={state.folder.title.text}
-            onChange={handleChange}
-            error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
-          />
+          <div className="settings-folder-input-wrapper">
+            <InputText
+              className="mb-0"
+              label={lang('FilterNameHint')}
+              value={state.folder.title.text}
+              onChange={handleChange}
+              error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
+            />
+
+            <div className="settings-folder-add-icon">
+              {renderEmoticon()}
+
+              <div className="settings-folder-select-icon">
+                {emoticons.map((emoticon) => (
+                  <div
+                    className="settings-folder-icon-wrapper"
+                    key={emoticon.name}
+                    data-emoticon={emoticon.name}
+                    onClick={handleSetEmoticon}
+                  >
+                    <emoticon.icon />
+                  </div>
+                ))}
+
+              </div>
+            </div>
+          </div>
         </div>
 
         {!isOnlyInvites && (

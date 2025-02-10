@@ -35,6 +35,10 @@
 
       opacity: 1;
       transition: opacity var(--layer-transition);
+
+      @media (min-width: 1276px) {
+        display: none;
+      }
     }
 
     &--tabs-hidden .TabList {

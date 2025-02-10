@@ -334,6 +334,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       >
         {displayedFolders && displayedFolders.length && displayedFolders.map((folder, i) => (
           <VerticalTab
+            key={folder.id}
             title={folder.title.text}
             badgeCount={folderCountersById[folder.id]?.chatsCount}
             isBadgeActive={Boolean(folderCountersById[folder.id]?.notificationsCount)}
@@ -342,6 +343,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
             clickArg={i}
             contextRootElementSelector="#LeftColumn"
             contextActions={folderTabs![i].contextActions}
+            emoticon={folder.emoticon}
           />
         ))}
       </div>
