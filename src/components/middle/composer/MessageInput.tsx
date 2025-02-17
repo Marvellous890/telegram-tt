@@ -55,6 +55,7 @@ type OwnProps = {
   isStoryInput?: boolean;
   customEmojiPrefix: string;
   editableInputId?: string;
+  editingMessage?: boolean;
   isReady: boolean;
   isActive: boolean;
   getHtml: Signal<string>;
@@ -118,6 +119,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   isStoryInput,
   customEmojiPrefix,
   editableInputId,
+  editingMessage,
   isReady,
   isActive,
   getHtml,
@@ -178,6 +180,31 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
 
   const [shouldDisplayTimer, setShouldDisplayTimer] = useState(false);
+  const [history, setHistory] = useState(['']);
+  const [cursor, setCursor] = useState([0]);
+  const [currentStep, setCurrentStep] = useState(0);
+  const MAX_HISTORY_STEPS = 50;
+
+  // Set the initial history and cursor
+  useEffect(() => {
+    setHistory([getHtml()]);
+    setCursor([getHtml().length]);
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, []);
+
+  // Reset history when edit mode changes
+  useEffect(() => {
+    if (editingMessage) {
+      setHistory([getHtml()]);
+      setCursor([getHtml().length]);
+    } else {
+      setHistory(['']);
+      setCursor([0]);
+    }
+
+    setCurrentStep(0);
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [editingMessage]);
 
   useEffect(() => {
     setShouldDisplayTimer(Boolean(timedPlaceholderLangKey && timedPlaceholderDate));
@@ -379,7 +406,56 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     document.addEventListener('keydown', handleCloseContextMenu);
   }
 
+  const restoreCursor = (pos: number | null) => {
+    if (!inputRef.current || !pos) return;
+
+    const selection = window.getSelection();
+    const range = document.createRange();
+    let charCount = 0;
+
+    const findPosition = (node: any) => {
+      if (charCount >= pos) return;
+
+      if (node.nodeType === 3) {
+        // Text Node
+        const nextCharCount = charCount + node.textContent.length;
+
+        if (nextCharCount >= pos) {
+          range.setStart(node, pos - charCount);
+          range.setEnd(node, pos - charCount);
+          return;
+        }
+
+        charCount = nextCharCount;
+      } else {
+        for (const child of node.childNodes) {
+          findPosition(child);
+          if (charCount >= pos) return;
+        }
+      }
+    };
+
+    findPosition(inputRef.current);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  };
+
+  function updateFromHistory(step: number) {
+    if (inputRef.current) {
+      inputRef.current.innerHTML = history[step];
+      restoreCursor(cursor[step]);
+      onUpdate(history[step]);
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'z' || e.key === 'y')) {
+      e.preventDefault();
+      updateFromHistory(e.key === 'z' ? Math.max(0, currentStep - 1) : Math.min(history.length - 1, currentStep + 1));
+      setCurrentStep((prev) => (e.key === 'z' ? Math.max(0, prev - 1) : Math.min(history.length - 1, prev + 1)));
+      return;
+    }
+
     // https://levelup.gitconnected.com/javascript-events-handlers-keyboard-and-load-events-1b3e46a6b0c3#1960
     const { isComposing } = e;
 
@@ -415,10 +491,43 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     }
   }
 
-  function handleChange(e: ChangeEvent<HTMLDivElement>) {
+  const saveCursor = (): number => {
+    if (!inputRef.current) return 0;
+
+    const selection = window.getSelection();
+
+    if (!selection || selection.rangeCount === 0) return 0;
+
+    const range = selection.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+
+    preCaretRange.selectNodeContents(inputRef.current);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+
+    return preCaretRange.toString().length;
+  };
+
+  function handleInput(e: ChangeEvent<HTMLDivElement>) {
     const { innerHTML, textContent } = e.currentTarget;
 
-    onUpdate(innerHTML === SAFARI_BR ? '' : innerHTML);
+    const newValue = innerHTML === SAFARI_BR ? '' : innerHTML;
+
+    let newHistory: string[] = [];
+    let newCursor: number[] = [];
+
+    if (currentStep !== history.length - 1) {
+      newHistory = [...history.slice(0, currentStep), newValue];
+      newCursor = [...cursor.slice(0, currentStep), saveCursor()];
+      setCurrentStep(currentStep + 1);
+    } else {
+      newHistory = [...history, newValue].slice(-MAX_HISTORY_STEPS);
+      newCursor = [...cursor, saveCursor()].slice(-MAX_HISTORY_STEPS);
+    }
+
+    onUpdate(newValue);
+    setHistory(newHistory);
+    setCursor(newCursor);
+    setCurrentStep(newHistory.length - 1);
 
     // Reset focus on the input to remove any active styling when input is cleared
     if (
@@ -579,7 +688,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
             dir="auto"
             tabIndex={0}
             onClick={focusInput}
-            onChange={handleChange}
+            onInput={handleInput}
             onKeyDown={handleKeyDown}
             onMouseDown={handleMouseDown}
             onContextMenu={IS_ANDROID ? handleAndroidContextMenu : undefined}

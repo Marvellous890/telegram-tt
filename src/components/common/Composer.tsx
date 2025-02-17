@@ -1830,6 +1830,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             ref={inputRef}
             id={inputId}
             editableInputId={editableInputId}
+            editingMessage={Boolean(shouldForceShowEditing && editingMessage)}
             customEmojiPrefix={type}
             isStoryInput={isInStoryViewer}
             chatId={chatId}
