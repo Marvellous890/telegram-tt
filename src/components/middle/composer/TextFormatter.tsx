@@ -40,6 +40,7 @@ interface ISelectedTextFormats {
   strikethrough?: boolean;
   monospace?: boolean;
   spoiler?: boolean;
+  quote?: boolean;
 }
 
 const TEXT_FORMAT_BY_TAG_NAME: Record<string, keyof ISelectedTextFormats> = {
@@ -51,6 +52,7 @@ const TEXT_FORMAT_BY_TAG_NAME: Record<string, keyof ISelectedTextFormats> = {
   DEL: 'strikethrough',
   CODE: 'monospace',
   SPAN: 'spoiler',
+  BLOCKQUOTE: 'quote',
 };
 const fragmentEl = document.createElement('div');
 
@@ -230,6 +232,40 @@ const TextFormatter: FC<OwnProps> = ({
     onClose();
   });
 
+  const handleQuoteText = useLastCallback(() => {
+    if (selectedTextFormats.quote) {
+      const element = getSelectedElement();
+      if (
+        !selectedRange
+        || !element
+        || element.dataset.entityType !== ApiMessageEntityTypes.Blockquote
+        || !element.textContent
+      ) {
+        return;
+      }
+
+      element.replaceWith(element.textContent);
+      setSelectedTextFormats((selectedFormats) => ({
+        ...selectedFormats,
+        quote: false,
+      }));
+
+      onClose();
+      return;
+    }
+
+    const text = getSelectedText();
+    document.execCommand(
+      'insertHTML',
+      false,
+      `<blockquote class="blockquote" data-entity-type="${ApiMessageEntityTypes.Blockquote}">${text}</blockquote>`,
+    );
+    setSelectedTextFormats((selectedFormats) => ({
+      ...selectedFormats,
+      quote: true,
+    }));
+  });
+
   const handleBoldText = useLastCallback(() => {
     setSelectedTextFormats((selectedFormats) => {
       // Somehow re-applying 'bold' command to already bold text doesn't work
@@ -344,6 +380,27 @@ const TextFormatter: FC<OwnProps> = ({
     onClose();
   });
 
+  const handleShiftEnter = useLastCallback(() => {
+    if (selectedTextFormats.quote) {
+      const element = getSelectedElement();
+      if (!element || element.tagName !== 'BLOCKQUOTE') {
+        return;
+      }
+
+      // Exit the quote and create a new line
+      const newLine = document.createElement('br');
+      element.parentElement?.insertBefore(newLine, element.nextSibling);
+
+      // Move the cursor to the new line
+      const range = document.createRange();
+      range.setStart(newLine, 0);
+      range.collapse(true);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+  });
+
   const handleKeyDown = useLastCallback((e: KeyboardEvent) => {
     const HANDLERS_BY_KEY: Record<string, AnyToVoidFunction> = {
       k: openLinkControl,
@@ -356,6 +413,13 @@ const TextFormatter: FC<OwnProps> = ({
     };
 
     const handler = HANDLERS_BY_KEY[getKeyFromEvent(e)];
+
+    if (e.shiftKey && e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      handleShiftEnter();
+      return;
+    }
 
     if (
       e.altKey
@@ -464,6 +528,14 @@ const TextFormatter: FC<OwnProps> = ({
           onClick={handleMonospaceText}
         >
           <Icon name="monospace" />
+        </Button>
+        <Button
+          color="translucent"
+          ariaLabel="Quote"
+          className={getFormatButtonClassName('quote')}
+          onClick={handleQuoteText}
+        >
+          <Icon name="quote" />
         </Button>
         <div className="TextFormatter-divider" />
         <Button color="translucent" ariaLabel={lang('TextFormat.AddLinkTitle')} onClick={openLinkControl}>
